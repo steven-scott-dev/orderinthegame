@@ -5,3 +5,13 @@ export const createPost = async () => {
     title: '⚖️ Order in the Game — cast your verdict!',
   });
 };
+
+export const createDailyPost = async (
+  subredditName: string,
+  caseTitle: string
+) => {
+  return await reddit.submitCustomPost({
+    subredditName,
+    title: `⚖️ ${caseTitle}`,
+  });
+};
