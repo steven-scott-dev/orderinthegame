@@ -4,7 +4,7 @@ import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useCase } from './hooks/useCase';
 import { useArguments } from './hooks/useArguments';
-import type { Verdict } from '../../shared/api';
+import type { Verdict } from '../shared/api';
 
 const ArgumentsSection = ({ userVote }: { userVote: Verdict }) => {
   const { args, loading, submitError, submit, upvote } = useArguments();
