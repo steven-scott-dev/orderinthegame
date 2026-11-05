@@ -52,3 +52,18 @@ export type ArgumentVoteResponse = {
   votes: number;
   alreadyVoted: boolean;
 };
+
+export type LeaderboardEntry = {
+  username: string;
+  streak: number;
+};
+
+export type LeaderboardResponse = {
+  type: 'leaderboard';
+  entries: LeaderboardEntry[];
+  you: {
+    username: string;
+    streak: number;
+    rank: number;
+  } | null;
+};
