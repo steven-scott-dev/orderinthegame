@@ -3,6 +3,7 @@ import { context, redis, reddit } from '@devvit/web/server';
 import type {
   CaseData,
   InitResponse,
+  LeaderboardResponse,
   Verdict,
   VoteResponse,
 } from '../../shared/api';
@@ -20,6 +21,7 @@ const tallyKey = (postId: string, side: Verdict) => `tally:${postId}:${side}`;
 const voteKey = (postId: string, username: string) =>
   `vote:${postId}:${username}`;
 const streakKey = (username: string) => `streak:${username}`;
+const streakBoardKey = 'leaderboard:streaks';
 
 const getOrSeedCase = async (postId: string): Promise<CaseData> => {
   const raw = await redis.get(caseKey(postId));
@@ -67,6 +69,11 @@ const recordVoteDay = async (username: string): Promise<number> => {
     }
   }
   await redis.set(streakKey(username), JSON.stringify({ count, lastDay: today }));
+  try {
+    await redis.zAdd(streakBoardKey, { member: username, score: count });
+  } catch (err) {
+    console.error('Failed to update the streak leaderboard', err);
+  }
   return count;
 };
 
@@ -169,4 +176,40 @@ api.post('/vote', async (c) => {
     alreadyVoted: false,
     streak,
   });
+});
+
+api.get('/leaderboard', async (c) => {
+  try {
+    const rows = await redis.zRange(streakBoardKey, 0, 9, {
+      by: 'rank',
+      reverse: true,
+    });
+    const entries = rows.map((r) => ({
+      username: r.member,
+      streak: r.score,
+    }));
+    let you: LeaderboardResponse['you'] = null;
+    const username = await reddit.getCurrentUsername();
+    if (username) {
+      const [score, rankAsc, total] = await Promise.all([
+        redis.zScore(streakBoardKey, username),
+        redis.zRank(streakBoardKey, username),
+        redis.zCard(streakBoardKey),
+      ]);
+      if (score !== undefined && rankAsc !== undefined) {
+        you = { username, streak: score, rank: total - rankAsc };
+      }
+    }
+    return c.json<LeaderboardResponse>({
+      type: 'leaderboard',
+      entries,
+      you,
+    });
+  } catch (error) {
+    console.error('Leaderboard failed:', error);
+    return c.json<ErrorResponse>(
+      { status: 'error', message: 'Failed to load the leaderboard' },
+      500
+    );
+  }
 });
