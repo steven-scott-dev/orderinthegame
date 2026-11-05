@@ -40,7 +40,18 @@ export const SEED_CASES: Omit<CaseData, 'id'>[] = [
 
 export const dayNumber = () => Math.floor(Date.now() / 86400000);
 
-export const caseForDay = (day: number): Omit<CaseData, 'id'> =>
-  SEED_CASES[day % SEED_CASES.length];
+export const caseForDay = (day: number): Omit<CaseData, 'id'> => {
+  const seed = SEED_CASES[day % SEED_CASES.length];
+  if (!seed) {
+    // Unreachable while SEED_CASES is non-empty; the fallback keeps the
+    // return type honest under noUncheckedIndexedAccess.
+    return {
+      title: 'The People vs. The Missing Case File',
+      evidence:
+        'The clerk opened the case drawer and found it completely empty. The court has decided to proceed anyway.',
+    };
+  }
+  return seed;
+};
 
 export const todaysCase = (): Omit<CaseData, 'id'> => caseForDay(dayNumber());
