@@ -44,5 +44,13 @@
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build"
+  },
+  "scheduler": {
+    "tasks": {
+      "daily-case": {
+        "endpoint": "/internal/scheduler/daily-case",
+        "cron": "0 14 * * *"
+      }
+    }
   }
 }
