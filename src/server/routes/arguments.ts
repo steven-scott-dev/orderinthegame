@@ -5,7 +5,6 @@ import type {
   ArgumentsResponse,
   ArgumentVoteResponse,
   CreateArgumentResponse,
-  Verdict,
 } from '../../shared/api';
 
 type ErrorResponse = {
