@@ -4,6 +4,7 @@ import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useCase } from './hooks/useCase';
 import { useArguments } from './hooks/useArguments';
+import { useLeaderboard } from './hooks/useLeaderboard';
 import type { Verdict } from '../shared/api';
 
 const ArgumentsSection = ({ userVote }: { userVote: Verdict }) => {
@@ -82,6 +83,71 @@ const ArgumentsSection = ({ userVote }: { userVote: Verdict }) => {
           </button>
         </div>
       ))}
+    </div>
+  );
+};
+
+const LeaderboardSection = () => {
+  const { data, loading } = useLeaderboard();
+  const you = data?.you ?? null;
+  const youOnBoard =
+    you !== null &&
+    (data?.entries.some((e) => e.username === you.username) ?? false);
+
+  return (
+    <div className="flex flex-col gap-2 mt-2">
+      <h3 className="text-sm font-black tracking-[0.2em] text-[#e8b34b] text-center">
+        🏆 TOP JURORS
+      </h3>
+      {loading && (
+        <p className="text-center text-xs text-[#a89c86]">
+          Calling the roll…
+        </p>
+      )}
+      {!loading && (!data || data.entries.length === 0) && (
+        <p className="text-center text-xs text-[#a89c86]">
+          No jurors on the board yet. Your streak could be the first.
+        </p>
+      )}
+      {data &&
+        data.entries.map((e, i) => {
+          const isYou = you !== null && e.username === you.username;
+          return (
+            <div
+              key={e.username}
+              className={`flex items-center gap-2 bg-[#221c14] border rounded-xl px-3 py-2 ${
+                isYou ? 'border-[#e8b34b]' : 'border-[#3a2f20]'
+              }`}
+            >
+              <span className="w-6 text-sm font-black text-[#e8b34b]">
+                {i + 1}
+              </span>
+              <span className="flex-1 truncate text-sm text-[#f5efe4]">
+                u/{e.username}
+                {isYou ? ' (you)' : ''}
+              </span>
+              <span className="text-sm font-bold text-[#e8b34b]">
+                🔥 {e.streak}
+              </span>
+            </div>
+          );
+        })}
+      {you && !youOnBoard && (
+        <div className="flex items-center gap-2 bg-[#221c14] border border-[#e8b34b] rounded-xl px-3 py-2">
+          <span className="w-6 text-sm font-black text-[#e8b34b]">
+            {you.rank}
+          </span>
+          <span className="flex-1 truncate text-sm text-[#f5efe4]">
+            u/{you.username} (you)
+          </span>
+          <span className="text-sm font-bold text-[#e8b34b]">
+            🔥 {you.streak}
+          </span>
+        </div>
+      )}
+      <p className="text-center text-[11px] text-[#a89c86]">
+        Ranked by current voting streak. Vote daily to climb.
+      </p>
     </div>
   );
 };
@@ -194,6 +260,8 @@ export const App = () => {
             )}
 
             {userVote && <ArgumentsSection userVote={userVote} />}
+
+            <LeaderboardSection />
           </>
         )}
       </div>
