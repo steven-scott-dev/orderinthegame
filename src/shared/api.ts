@@ -34,6 +34,7 @@ export type Argument = {
   text: string;
   votes: number;
   createdAt: number;
+  commentId?: string;
 };
 
 export type ArgumentsResponse = {
