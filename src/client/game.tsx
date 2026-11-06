@@ -44,6 +44,10 @@ const ArgumentsSection = ({ userVote }: { userVote: Verdict }) => {
           SEND
         </button>
       </div>
+      <p className="text-center text-[11px] text-[#a89c86]">
+        Your argument also posts as a comment on this post under your
+        username — public and reportable, like any Reddit comment.
+      </p>
       {submitError && (
         <p className="text-center text-xs text-red-400">{submitError}</p>
       )}
