@@ -46,7 +46,14 @@ export const useArguments = () => {
       return false;
     }
     if (!res.ok) {
-      setSubmitError('Could not post your argument. Try again.');
+      let message = 'Could not post your argument. Try again.';
+      try {
+        const body: { message?: string } = await res.json();
+        if (body.message) message = body.message;
+      } catch {
+        // Keep the default message if the body is not JSON.
+      }
+      setSubmitError(message);
       return false;
     }
     const data: CreateArgumentResponse = await res.json();
