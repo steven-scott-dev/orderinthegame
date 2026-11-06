@@ -52,5 +52,12 @@
         "cron": "0 14 * * *"
       }
     }
+  },
+  "permissions": {
+    "reddit": {
+      "asUser": [
+        "SUBMIT_COMMENT"
+      ]
+    }
   }
 }
