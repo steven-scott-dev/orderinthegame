@@ -79,6 +79,29 @@ argumentsApi.post('/arguments', async (c) => {
       400
     );
   }
+  // App Review requirement: user text shown in the app must be published
+  // with reportable, actionable attribution. Post the argument as a real
+  // Reddit comment on this post, as the user, before saving it in-app.
+  // If the comment cannot be posted, the argument is not saved.
+  let commentId: string;
+  try {
+    const comment = await reddit.submitComment({
+      id: postId,
+      text: `⚖️ **${userVote === 'guilty' ? 'GUILTY' : 'NOT GUILTY'}** — ${text}`,
+      runAs: 'USER',
+    });
+    commentId = comment.id;
+  } catch (err) {
+    console.error('Failed to publish argument as a comment', err);
+    return c.json<ErrorResponse>(
+      {
+        status: 'error',
+        message:
+          'Your argument could not be posted as a comment, so it was not saved. Please try again.',
+      },
+      502
+    );
+  }
   const argument: Argument = {
     id: makeId(),
     username,
@@ -86,6 +109,7 @@ argumentsApi.post('/arguments', async (c) => {
     text,
     votes: 0,
     createdAt: Date.now(),
+    commentId,
   };
   const args = await readArgs(postId);
   args.push(argument);
